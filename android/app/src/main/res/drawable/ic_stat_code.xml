@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 通知栏小图标（单色白） -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3,3 h18 a2,2 0 0 1 2,2 v14 a2,2 0 0 1 -2,2 h-18 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" />
+    <path
+        android:fillColor="#1F6FEB"
+        android:pathData="M6,8 h12 v2 h-12 z" />
+    <path
+        android:fillColor="#1F6FEB"
+        android:pathData="M6,12 h12 v2 h-12 z" />
+    <path
+        android:fillColor="#1F6FEB"
+        android:pathData="M9,16 h6 v2 h-6 z" />
+</vector>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    自适应图标前景：立体快递箱（对应网页里用的 📦）
+    画布 108×108，安全区为中心 66×66，图形控制在 30..78 之间。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 箱体正面 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,50 h44 v26 a4,4 0 0 1 -4,4 h-36 a4,4 0 0 1 -4,-4 z" />
+
+    <!-- 箱体顶面（透视，浅灰以体现立体感） -->
+    <path
+        android:fillColor="#E8EDF5"
+        android:pathData="M32,50 L44,38 h32 l-8,12 z" />
+
+    <!-- 顶面右侧暗面 -->
+    <path
+        android:fillColor="#D3DAE6"
+        android:pathData="M76,50 L88,38 v26 a4,4 0 0 1 -4,4 h-8 z" />
+
+    <!-- 封箱胶带（竖向，压在正面中间） -->
+    <path
+        android:fillColor="#FFC24D"
+        android:pathData="M50,50 h8 v30 h-8 z" />
+
+    <!-- 胶带在顶面的部分 -->
+    <path
+        android:fillColor="#FFD873"
+        android:pathData="M50,50 L62,38 h8 l-12,12 z" />
+
+    <!-- 箱体描边，避免浅色壁纸下边缘糊掉 -->
+    <path
+        android:strokeColor="#2B3A4D"
+        android:strokeWidth="2"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M32,50 L44,38 h32 L88,50 v26 a4,4 0 0 1 -4,4 h-48 a4,4 0 0 1 -4,-4 z" />
+    <path
+        android:strokeColor="#2B3A4D"
+        android:strokeWidth="2"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M32,50 h56 M44,38 L50,50 M76,38 L70,50" />
+</vector>

@@ -1,0 +1,17 @@
+{
+  "name": "mashangqu",
+  "version": "0.1.0",
+  "private": true,
+  "description": "码上取 —— 多平台取件码统一管理（自托管，零依赖）",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/run-tests.mjs",
+    "test:api": "node test/api.test.mjs",
+    "test:fe": "node test/frontend.test.mjs",
+    "test:all": "node test/run-all.mjs"
+  }
+}

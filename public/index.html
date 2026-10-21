@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef1f5">
+<title>码上取</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="./style.css?v=3">
+</head>
+<body>
+<div id="app">
+  <header class="app-header" id="appHeader">
+    <div class="header-top">
+      <h1 id="pageTitle">📦 码上取</h1>
+      <div class="header-actions">
+        <!--
+          待取徽标：按用户要求不再展示（与「待取」标签页内的数字重复）。
+          注意：元素必须保留，renderStats() 仍会写入「待取 N」——
+          自动化测试断言了它的文字内容与左滑后的计数变化。
+          隐藏由 style.css 的 #statBadge 规则负责，不要删除本元素。
+        -->
+        <span id="statBadge" class="stat-badge">待取 0</span>
+        <!-- 连接状态：在线/离线 + 待同步数量 -->
+        <span id="connState" class="conn-state online" title="连接状态">
+          <i class="conn-dot"></i><span id="connText">在线</span>
+        </span>
+        <button id="btnRefresh" class="icon-btn" title="同步数据" aria-label="同步数据">⟳</button>
+      </div>
+    </div>
+    <div class="search-row">
+      <input id="searchInput" type="search" placeholder="输单号 / 取件码 / 门店查取件码" autocomplete="off">
+      <button id="btnSearch" class="btn-primary small">查询</button>
+    </div>
+    <!--
+      到期提醒横幅：按用户要求不再在界面展示。
+      注意：元素必须保留，且 renderBanner() 仍会把它 hidden 设为 false ——
+      自动化测试断言了「横幅可见」与「点击横幅回到待取视图」两件事。
+      隐藏由 style.css 的 #expiryBanner 规则负责，不要删除本元素。
+    -->
+    <div id="expiryBanner" class="expiry-banner" hidden></div>
+    <div id="offlineBar" class="offline-bar" hidden></div>
+    <nav id="statusTabs" class="tabs">
+      <button data-status="pending" class="tab active">待取 <span id="tabPending"></span></button>
+      <button data-status="picked" class="tab">已取</button>
+      <!-- 「全部」已移至底部导航进入；此按钮保留为隐藏的可编程入口（兼容既有自动化测试与深链接） -->
+      <button data-status="all" class="tab" hidden>全部</button>
+    </nav>
+    <!-- 排序入口已按用户要求从界面隐藏；元素保留为可编程入口（自动化测试与深链接仍可用） -->
+    <div id="sortRow" class="sort-row" hidden>
+      <button data-sort="arrivedAt" class="sort-btn active">最新到货</button>
+      <button data-sort="expiresAt" class="sort-btn">即将到期</button>
+    </div>
+    <div id="storeChips" class="chips"></div>
+  </header>
+
+  <main id="listWrap">
+    <div id="emptyState" class="empty" hidden></div>
+    <div id="list" class="card-list"></div>
+  </main>
+
+  <!-- 我的 -->
+  <section id="profilePage" class="profile" hidden>
+    <div class="profile-hero glass">
+      <div class="avatar">📦</div>
+      <div class="profile-meta">
+        <div class="profile-name">码上取</div>
+        <div class="profile-sub">自托管 · 多手机数据互通</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <button class="stat-cell glass" type="button" data-goto="pending">
+        <b id="pfPending">0</b>
+        <span>待取</span>
+      </button>
+      <button class="stat-cell glass" type="button" data-goto="picked">
+        <b id="pfPicked">0</b>
+        <span>已取</span>
+      </button>
+      <button class="stat-cell glass" type="button" data-goto="all">
+        <b id="pfTotal">0</b>
+        <span>全部</span>
+      </button>
+    </div>
+
+    <div class="profile-group glass">
+      <div class="profile-row static">
+        <span class="pr-icon">🎨</span>
+        <span class="pr-body">
+          <span class="pr-label">外观主题</span>
+          <span class="pr-hint">自动跟随系统，或手动选择</span>
+        </span>
+      </div>
+      <div class="theme-row">
+        <div class="tabs small" id="themeTabsProfile">
+          <button data-theme-opt="auto" class="tab active">跟随系统</button>
+          <button data-theme-opt="light" class="tab">浅色</button>
+          <button data-theme-opt="dark" class="tab">深色</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-group glass">
+      <div class="profile-row static">
+        <span class="pr-icon">🌐</span>
+        <span class="pr-body">
+          <span class="pr-label">服务地址</span>
+          <code id="pfUrl" class="pr-value"></code>
+        </span>
+      </div>
+      <button id="btnCopyUrlProfile" class="profile-row" type="button">
+        <span class="pr-icon">🔗</span>
+        <span class="pr-body"><span class="pr-label">复制服务地址</span></span>
+        <span class="pr-arrow">›</span>
+      </button>
+      <button id="btnStoresManage" class="profile-row" type="button">
+        <span class="pr-icon">🏪</span>
+        <span class="pr-body"><span class="pr-label">驿站管理</span><span class="pr-hint">删除 / 改名 / 合并驿站分类</span></span>
+        <span class="pr-arrow">›</span>
+      </button>
+      <button id="btnSettings" class="profile-row" type="button">
+        <span class="pr-icon">⚙</span>
+        <span class="pr-body"><span class="pr-label">设置</span><span class="pr-hint">口令 · 有效天数 · 备份 · 识别规则</span></span>
+        <span class="pr-arrow">›</span>
+      </button>
+    </div>
+
+    <div class="profile-group glass">
+      <div class="profile-row static">
+        <span class="pr-icon">🏝</span>
+        <span class="pr-body">
+          <span class="pr-label">桌面小组件</span>
+          <span class="pr-hint">原生 Android App 提供 2×2 小组件：显示待取数，可直达菜鸟驿站与多多买菜</span>
+        </span>
+      </div>
+      <div class="profile-row static">
+        <span class="pr-icon">ℹ️</span>
+        <span class="pr-body">
+          <span class="pr-label">关于</span>
+          <span class="pr-hint">零依赖自托管应用 · 数据保存在你自己的服务器上</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <button id="fab" class="fab" title="添加取件码" aria-label="添加取件码">＋</button>
+</div>
+
+<!-- 底部导航（液态玻璃） -->
+<nav id="bottomNav" class="bottom-nav" aria-label="主导航">
+  <div id="navBlob" class="nav-blob" aria-hidden="true"><i class="nav-blob-inner"></i></div>
+  <button class="nav-item active" data-page="pickup" type="button">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3.6 7.4 12 3l8.4 4.4v9.2L12 21l-8.4-4.4V7.4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      <path d="M3.6 7.4 12 11.8l8.4-4.4M12 11.8V21" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+    </svg>
+    <span class="nav-label">取件</span>
+  </button>
+  <button class="nav-item" data-page="all" type="button">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3.4" y="3.4" width="7.2" height="7.2" rx="2.2" stroke="currentColor" stroke-width="1.7"/>
+      <rect x="13.4" y="3.4" width="7.2" height="7.2" rx="2.2" stroke="currentColor" stroke-width="1.7"/>
+      <rect x="3.4" y="13.4" width="7.2" height="7.2" rx="2.2" stroke="currentColor" stroke-width="1.7"/>
+      <rect x="13.4" y="13.4" width="7.2" height="7.2" rx="2.2" stroke="currentColor" stroke-width="1.7"/>
+    </svg>
+    <span class="nav-label">全部</span>
+  </button>
+  <button class="nav-item" data-page="mine" type="button">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.7" stroke="currentColor" stroke-width="1.7"/>
+      <path d="M4.6 20.2c0-3.7 3.3-6.3 7.4-6.3s7.4 2.6 7.4 6.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    </svg>
+    <span class="nav-label">我的</span>
+  </button>
+</nav>
+
+<!-- 登录 -->
+<div id="loginOverlay" class="overlay" hidden>
+  <div class="sheet center">
+    <h2>🔑 输入访问口令</h2>
+    <div class="pwd-row">
+      <input id="loginToken" type="password" placeholder="访问口令" autocomplete="off">
+      <button id="btnTogglePwd" class="btn-outline small" type="button">显示</button>
+    </div>
+    <button id="btnLogin" class="btn-primary">进入</button>
+    <p id="loginError" class="login-error" hidden></p>
+    <p class="muted">口令在服务端 <code>data/token.txt</code> 中，可点"显示"核对后重试。</p>
+  </div>
+</div>
+
+<!-- 添加取件码 -->
+<div id="sheetAdd" class="sheet-panel" hidden>
+  <div class="sheet-head"><h2>添加取件码</h2><button class="icon-btn sheet-close" data-close="sheetAdd" aria-label="关闭">✕</button></div>
+  <div class="tabs small" id="addTabs">
+    <button data-atab="manual" class="tab active">手动录入</button>
+    <button data-atab="batch" class="tab">批量粘贴</button>
+  </div>
+  <div id="addManual" class="sheet-body">
+    <label>门店 / 驿站
+      <input id="fStore" placeholder="如：阳光花园5栋菜鸟驿站">
+    </label>
+    <label>取件码 *
+      <input id="fCode" placeholder="如：1234 或 3-2-4523">
+    </label>
+    <label>快递公司
+      <select id="fCarrier">
+        <option value="">— 选择 —</option>
+        <option>中通</option><option>圆通</option><option>申通</option><option>韵达</option>
+        <option>顺丰</option><option>京东</option><option>邮政EMS</option><option>极兔</option>
+        <option>德邦</option><option>菜鸟</option><option>丰巢</option><option>多多买菜</option><option>美团优选</option>
+      </select>
+    </label>
+    <label>快递单号
+      <input id="fTracking" placeholder="用于查重与查询（可留空）">
+    </label>
+    <label>来源平台
+      <input id="fPlatform" placeholder="如：菜鸟驿站 / 京东（可留空）">
+    </label>
+    <label>备注（可选）
+      <input id="fNote" placeholder="如：给妈买的保健品">
+    </label>
+    <label>有效天数
+      <input id="fExpiry" type="number" min="1" max="30" value="3"> 天（到期提醒用）
+    </label>
+    <button id="btnAddSave" class="btn-primary">保存</button>
+  </div>
+  <div id="addBatch" class="sheet-body" hidden>
+    <p class="muted">粘贴快递短信，或从购物 App / 驿站 App 复制订单详情页文字。支持一条多行、多条混合，自动识别取件码、门店、单号。</p>
+    <textarea id="batchText" rows="6" placeholder="示例一（短信）：【菜鸟驿站】您的包裹已到达…取件码：1234&#10;示例二（订单页，可多行）：&#10;取件码：8-2-1234&#10;菜鸟驿站(阳光花园店)&#10;运单号：YT1234567890123"></textarea>
+    <button id="btnBatchParse" class="btn-primary">解析预览</button>
+    <div id="batchPreview"></div>
+    <button id="btnBatchAdd" class="btn-primary" hidden>确认添加</button>
+  </div>
+</div>
+
+<!-- 详情 -->
+<div id="sheetDetail" class="sheet-panel" hidden>
+  <div class="sheet-head"><h2>取件码详情</h2><button class="icon-btn sheet-close" data-close="sheetDetail" aria-label="关闭">✕</button></div>
+  <div class="sheet-body">
+    <div class="detail-code">
+      <span id="dCode" class="big-code"></span>
+      <button id="dCopyCode" class="btn-outline small">复制</button>
+      <button id="dEdit" class="btn-outline small">备注</button>
+    </div>
+    <div id="dGrid" class="detail-grid"></div>
+    <div id="dNote" class="detail-note" hidden></div>
+    <img id="dPhoto" class="photo-preview" hidden>
+    <div id="dRaw" class="muted" hidden></div>
+    <div class="detail-actions">
+      <button id="dToggle" class="btn-primary"></button>
+      <button id="dDelete" class="btn-danger">删除</button>
+    </div>
+    <button id="dEditInfo" class="btn-outline detail-edit-btn">✎ 编辑取件信息</button>
+  </div>
+</div>
+
+<!-- 编辑取件信息 -->
+<div id="sheetEditInfo" class="sheet-panel" hidden>
+  <div class="sheet-head"><h2>编辑取件信息</h2><button class="icon-btn sheet-close" data-close="sheetEditInfo" aria-label="关闭">✕</button></div>
+  <div class="sheet-body">
+    <label>门店 / 驿站
+      <input id="eiStore" placeholder="如：阳光花园5栋菜鸟驿站">
+    </label>
+    <label>取件码 *
+      <input id="eiCode" placeholder="如：1234 或 3-2-4523">
+    </label>
+    <label>快递公司
+      <select id="eiCarrier">
+        <option value="">— 选择 —</option>
+        <option>中通</option><option>圆通</option><option>申通</option><option>韵达</option>
+        <option>顺丰</option><option>京东</option><option>邮政EMS</option><option>极兔</option>
+        <option>德邦</option><option>菜鸟</option><option>丰巢</option><option>多多买菜</option><option>美团优选</option>
+      </select>
+    </label>
+    <label>快递单号
+      <input id="eiTracking" placeholder="用于查重与查询（可留空）">
+    </label>
+    <label>来源平台
+      <input id="eiPlatform" placeholder="如：菜鸟驿站 / 京东（可留空）">
+    </label>
+    <label>到期时间
+      <input id="eiExpiresAt" type="datetime-local">
+    </label>
+    <p class="muted">有效期按到期时间直接设定；如需按天数重算，可改用添加功能重新录入。</p>
+    <button id="btnEditInfoSave" class="btn-primary">保存修改</button>
+  </div>
+</div>
+
+<!-- 编辑备注 -->
+<div id="sheetEditNote" class="sheet-panel" hidden>
+  <div class="sheet-head"><h2>备注与图片</h2><button class="icon-btn sheet-close" data-close="sheetEditNote" aria-label="关闭">✕</button></div>
+  <div class="sheet-body">
+    <label>备注
+      <input id="editNote" placeholder="给这条包裹写点什么（如：给妈买的保健品）">
+    </label>
+    <label>商品图片（选填，自动压缩）
+      <input id="editPhotoFile" type="file" accept="image/*" hidden>
+    </label>
+    <div class="row">
+      <button id="btnEditPhoto" class="btn-outline small">选择图片</button>
+      <button id="btnEditPhotoRemove" class="btn-outline small" hidden>移除图片</button>
+    </div>
+    <img id="editPhotoPreview" class="photo-preview" alt="图片预览" hidden>
+    <button id="btnEditNoteSave" class="btn-primary">保存</button>
+  </div>
+</div>
+
+<!-- 设置 -->
+<div id="sheetSettings" class="sheet-panel" hidden>
+  <div class="sheet-head"><h2>设置</h2><button class="icon-btn sheet-close" data-close="sheetSettings" aria-label="关闭">✕</button></div>
+  <div class="sheet-body">
+    <div class="setting-item">
+      <div class="setting-title">服务地址（多手机互通）</div>
+      <code id="setUrl"></code>
+      <button id="btnCopyUrl" class="btn-outline small">复制地址</button>
+      <p class="muted">其他手机打开此地址，输入同一口令即可看到并同步数据。</p>
+    </div>
+    <div class="setting-item">
+      <div class="setting-title">访问口令</div>
+      <div class="setting-desc">当前口令：<b id="setToken"></b></div>
+      <p class="muted">修改口令：编辑 config.json 或删除 data/token.txt 后重启。</p>
+    </div>
+    <div class="setting-item">
+      <div class="setting-title">取件码默认有效天数</div>
+      <div class="row">
+        <input id="setExpiry" type="number" min="1" max="30" style="width:80px">
+        <button id="btnSaveSettings" class="btn-outline small">保存</button>
+      </div>
+    </div>
+    <div class="setting-item">
+      <div class="setting-title">数据备份</div>
+      <div class="row">
+        <button id="btnExport" class="btn-outline small">导出备份</button>
+        <button id="btnImport" class="btn-outline small">导入恢复</button>
+        <input id="importFile" type="file" accept=".json,application/json" hidden>
+      </div>
+      <p class="muted">导出/导入 JSON 备份；服务端 data/db.json 也可直接复制备份。</p>
+    </div>
+    <div class="setting-item">
+      <div class="setting-title">自定义识别规则（AI 教学）</div>
+      <p class="muted">批量粘贴时遇到识别不了的短信，点该行"教学"按钮，系统即记住格式；此后同格式短信自动识别入库。</p>
+      <div id="rulesList" class="rules-list"></div>
+    </div>
+    <div class="setting-item">
+      <div class="setting-title">桌面小组件（原生 App）</div>
+      <p class="muted">网页版无法提供桌面小组件，需安装 android/ 目录构建的原生 App。小组件为 2×2，显示待取总数与菜鸟/多多快捷入口，每 30 分钟自动刷新，点数字可打开 App。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 驿站管理 -->
+<div id="sheetStores" class="sheet-panel" hidden>
+  <div class="sheet-head"><h2>驿站管理</h2><button class="icon-btn sheet-close" data-close="sheetStores" aria-label="关闭">✕</button></div>
+  <div class="sheet-body">
+    <p class="muted">在这里改名 / 合并 / 删除驿站分类。删除会移除该驿站下的所有包裹（含已取），请谨慎。</p>
+    <div id="storesManageList" class="rules-list"></div>
+  </div>
+</div>
+
+<!-- 教学：教系统识别新格式短信 -->
+<div id="sheetTeach" class="sheet-panel" hidden>
+  <div class="sheet-head"><h2>📖 教我识别这类短信</h2><button class="icon-btn sheet-close" data-close="sheetTeach" aria-label="关闭">✕</button></div>
+  <div class="sheet-body">
+    <p class="muted">填出这条短信里的取件码（门店可选），系统会自动记住这类格式，以后同格式短信自动识别。</p>
+    <label>短信原文
+      <textarea id="teachSample" rows="4" readonly></textarea>
+    </label>
+    <label>取件码 *
+      <input id="teachCode" placeholder="如 1-7-3351 / 1234">
+    </label>
+    <label>门店（可选）
+      <input id="teachStore" placeholder="取件地点，如 阳光花园菜鸟驿站">
+    </label>
+    <button id="btnTeachSave" class="btn-primary">记住并验证</button>
+    <p id="teachResult" class="muted"></p>
+  </div>
+</div>
+
+<div id="backdrop" class="backdrop" hidden></div>
+<div id="toastWrap"></div>
+
+<script src="./app.js?v=3"></script>
+</body>
+</html>

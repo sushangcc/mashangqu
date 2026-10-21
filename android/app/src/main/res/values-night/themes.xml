@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        深色模式：状态栏/导航栏改为深色背景，图标改用浅色，
+        否则会出现「浅色底 + 浅色图标」看不清的问题。
+    -->
+    <style name="Theme.Mashangqu" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+
+        <item name="android:statusBarColor">@color/window_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <item name="android:navigationBarColor">@color/window_bg</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>

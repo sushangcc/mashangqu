@@ -1,0 +1,24 @@
+# 运行时数据（含口令）
+data/
+data-test/
+
+# 本地配置（含口令）
+config.json
+
+# 测试依赖（jsdom 等，npm install --no-save 产物）
+node_modules/
+.npm-cache/
+
+# 日志
+*.log
+
+# DSH 会话存档（对话记录 + 附件，不属于项目源码）
+dsh-session-session-*/
+
+# 临时笔记 / 草稿
+search_notes.md
+
+# 含个人路径与本机信息，不推送
+交接文档-UI升级.md
+简历项目经历.md
+TODO.md

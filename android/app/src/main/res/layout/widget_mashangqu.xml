@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  2×2 桌面小组件布局（玻璃拟态）
+
+  说明：RemoteViews 只支持有限控件（FrameLayout / LinearLayout / TextView / ImageView 等），
+  且不支持 backdrop-filter 实时模糊 —— 这是 Android 桌面小组件的系统限制。
+  玻璃质感通过「半透明白底 + 细描边 + 圆角 + 阴影」模拟。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widgetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_bg_glass"
+    android:padding="14dp">
+
+    <!-- 顶部：刷新钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <ImageView
+            android:id="@+id/widgetRefresh"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_widget_refresh"
+            android:contentDescription="刷新"
+            android:alpha="0.55" />
+    </LinearLayout>
+
+    <!-- 中部：待取数 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/widgetCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="—"
+            android:textSize="44sp"
+            android:textStyle="bold"
+            android:textColor="#16202B"
+            android:includeFontPadding="false" />
+
+        <TextView
+            android:id="@+id/widgetHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="个待取快递"
+            android:textSize="12sp"
+            android:textColor="#6B7887"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
+
+    <!-- 底部：两个驿站快捷入口 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/widgetCainiao"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="菜鸟 0"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#16202B"
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/widget_bg_pill" />
+
+        <TextView
+            android:id="@+id/widgetDuoduo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="多多 0"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#16202B"
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/widget_bg_pill" />
+    </LinearLayout>
+
+</LinearLayout>

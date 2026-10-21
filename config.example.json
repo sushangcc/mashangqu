@@ -1,0 +1,7 @@
+{
+  "port": 8000,
+  "host": "0.0.0.0",
+  "token": "改成你的强口令",
+  "expiryDays": 3,
+  "dataDir": "./data"
+}

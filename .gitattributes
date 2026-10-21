@@ -1,0 +1,10 @@
+# 统一换行符：提交时转 LF，检出时按平台
+* text=auto eol=lf
+
+# Windows 批处理脚本需要 CRLF，否则某些情况下不执行
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# PowerShell 脚本：tray.ps1 含中文，必须是 UTF-8 with BOM 且不做换行转换
+# （Windows PowerShell 5.1 依赖 BOM 才按 UTF-8 解析，无 BOM 会按 GBK 读成乱码）
+tools/tray.ps1 -text

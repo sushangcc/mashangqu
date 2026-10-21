@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 深色模式下图标背景略微加深，避免过亮 -->
+    <color name="primary">#6B85F0</color>
+    <color name="ic_launcher_background">#2A3E8F</color>
+    <!-- 深色模式下页面背景为 #12161C，系统栏同步 -->
+    <color name="window_bg">#12161C</color>
+</resources>

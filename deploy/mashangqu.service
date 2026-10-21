@@ -1,0 +1,28 @@
+# 码上取 —— systemd 服务样例（云服务器 / Linux 常驻运行）
+# 用法：
+#   1. 把项目放到 /opt/mashangqu（或修改 WorkingDirectory / ExecStart 路径）
+#   2. 修改 Environment=TOKEN 为你的强口令
+#   3. sudo cp deploy/mashangqu.service /etc/systemd/system/
+#   4. sudo systemctl daemon-reload && sudo systemctl enable --now mashangqu
+#   5. 查看状态: sudo systemctl status mashangqu；查看日志: journalctl -u mashangqu -f
+[Unit]
+Description=码上取 (Kuaidi Code Collection)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/mashangqu
+ExecStart=/usr/bin/node /opt/mashangqu/server.js
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+Environment=PORT=8000
+Environment=TOKEN=请改成你的强口令
+# 数据目录默认 ./data，如需放到独立位置：
+# Environment=DATA_DIR=/var/lib/mashangqu/data
+# 建议新建低权限用户运行：
+# User=mashangqu
+# Group=mashangqu
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        界面完全由 WebView 内的网页提供，不需要 Android 自带标题栏，
+        因此继承 NoActionBar 主题，避免顶部出现黑色标题条。
+
+        状态栏与导航栏不要用主题蓝：它们属于系统区域，
+        与网页内容上下相接，颜色应与页面背景一致，
+        否则会出现上下两条突兀的蓝色横条。
+    -->
+    <style name="Theme.Mashangqu" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+
+        <item name="android:statusBarColor">@color/window_bg</item>
+        <!-- 浅色背景上使用深色状态栏图标，否则时间/电量看不见 -->
+        <item name="android:windowLightStatusBar">true</item>
+
+        <item name="android:navigationBarColor">@color/window_bg</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">码上取</string>
+    <string name="widget_description">显示待取快递数，可直达菜鸟驿站与多多买菜</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  桌面小组件声明：2×2 尺寸。
+  targetCellWidth/Height 需要 API 31+；minWidth/minHeight 为兼容旧版的等效尺寸
+  （2 格 ≈ 110dp，按 Android 官方公式 70×n-30 计算）。
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/widget_mashangqu"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen"
+    android:previewImage="@mipmap/ic_launcher"
+    android:description="@string/widget_description" />
